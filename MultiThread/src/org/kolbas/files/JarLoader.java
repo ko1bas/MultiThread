@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -124,8 +125,8 @@ public class JarLoader extends ClassLoader {
 	 * @return пустой ArrayList, если таких классов нет
 	 * 
 	 */
-	public ArrayList<Class<?>> getClassesImplementsInterface (String interfaceName) throws ClassNotFoundException {
-		ArrayList<Class<?>> result = new ArrayList<Class<?>>();
+	public List<Class<?>> getClassesImplementsInterface (String interfaceName) throws ClassNotFoundException {
+		List<Class<?>> result = new ArrayList<Class<?>>();
 		
 		if ("".equals(interfaceName)||interfaceName.equals(null))
 			return result;

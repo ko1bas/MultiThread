@@ -4,10 +4,9 @@
 package org.kolbas.threads;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
-
-import javax.swing.plaf.SliderUI;
 
 import org.kolbas.common.interfaces.StringConvertable;
 
@@ -15,28 +14,37 @@ import org.kolbas.common.interfaces.StringConvertable;
  * @author Колбсов П.А.
  *
  */
-public class QueueReaderThread implements Runnable {
+public class QueueReaderThread extends Thread {
 
-	private BlockingQueue<String> query;
+	private BlockingQueue<String> queue;
 
-	private StringConvertable currClass;
+	private StringConvertable plugin;
 
 	private ConcurrentMap<String, Boolean> map;
 
-	public QueueReaderThread(BlockingQueue<String> query, Class<?> module,
+
+	public QueueReaderThread(BlockingQueue<String> queue, Class<?> plugin,
 			ConcurrentMap<String, Boolean> map) throws InstantiationException,
 			IllegalAccessException {
 
-		this.query = query;
-		this.currClass = (StringConvertable) module.newInstance();
+		this.queue = queue;
+		this.plugin = (StringConvertable) plugin.newInstance();
 		this.map = map;
 	}
 
-	@Override
 	public void run() {
-		ArrayList<String> array = currClass.getDeletedStrings(query.poll());
-		for (String string : array) {
-			map.putIfAbsent(string, true);
+		
+		while (true) {
+			ArrayList<String> array;
+			try {
+				String res = queue.remove();
+				array = plugin.getDeletedStrings(res);
+				for (String string : array) {
+					map.putIfAbsent(string, true);
+				}
+			} catch (NoSuchElementException IOE) {
+				break;
+			}
 		}
 	}
 

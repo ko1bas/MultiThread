@@ -6,7 +6,6 @@ package org.kolbas.threads;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
-import org.kolbas.common.interfaces.StringConvertable;
 import org.kolbas.files.FileLoader;
 
 /**
@@ -16,12 +15,12 @@ import org.kolbas.files.FileLoader;
 public class FileReaderThread extends Thread {
 
 	private FileLoader loader;
-	private BlockingQueue<String> query;
+	private BlockingQueue<String> queue;
 
-	public FileReaderThread(FileLoader loader, BlockingQueue<String> query) {
+	public FileReaderThread(FileLoader loader, BlockingQueue<String> queue) {
 
 		this.loader = loader;
-		this.query = query;
+		this.queue = queue;
 	}
 
 	@Override
@@ -33,7 +32,7 @@ public class FileReaderThread extends Thread {
 				if (buf == null)
 					break;
 				try {
-					query.put(buf);
+					queue.put(buf);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

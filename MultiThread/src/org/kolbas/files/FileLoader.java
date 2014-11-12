@@ -8,12 +8,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -41,9 +39,9 @@ public class FileLoader{
 		reader = new BufferedReader(new InputStreamReader(sis));
 	}
 
-	public ArrayList<String> nextStrings(int N) {
+	public List<String> nextStrings(int N) {
 		try {
-			ArrayList<String> res = new ArrayList<String>(N);
+			List<String> res = new ArrayList<String>(N);
 
 			for (int i = 0; i < N; i++) {
 				String buf = reader.readLine();
@@ -54,7 +52,7 @@ public class FileLoader{
 			return res;
 
 		} catch (IOException e) {
-			return (ArrayList<String>) Collections.EMPTY_LIST;
+			return (List<String>) Collections.EMPTY_LIST;
 		}
 	}
 

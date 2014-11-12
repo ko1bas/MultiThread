@@ -4,14 +4,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.kolbas.common.interfaces.StringConvertable;
 import org.kolbas.files.FileLoader;
@@ -51,28 +50,28 @@ public class Main {
 			}
 			break;
 		default:
-			// p(resource.getString("ErrCommandFailure"));
-			// printHelpStr();
+			// Дописать проверку
+			//MultiThread <jar-file> <txt-file1> [<txt-file2> ...] 
 			res = true;
 			break;
 		}
 		return res;
 	}
 
-	public static void OneThread(Class<?> currClass, String outFileName,
+	public static void OneThread(Class<?> plugin, String outFileName,
 			String[] args) throws FileNotFoundException, IOException,
 			InstantiationException, IllegalAccessException {
 
 		long time = System.currentTimeMillis();
 		int start = 1;
 		FileLoader loader = new FileLoader(args, start);
-		
+
 		String buf = "";
-		StringConvertable module = (StringConvertable) currClass.newInstance();
-		
-		int setCapacity = 1000;
+		StringConvertable module = (StringConvertable) plugin.newInstance();
+
+		int setCapacity = 10000;
 		Set<String> set = new HashSet<String>(setCapacity);
-		
+
 		while (true) {
 			buf = loader.next();
 			if (buf == null)
@@ -82,60 +81,62 @@ public class Main {
 			}
 		}
 		loader.close();
-		
+
 		FileSaver saver = new FileSaver(outFileName);
 		for (String key : set) {
 			saver.write(key);
 		}
 		saver.close();
-		
-		System.out.println("Time: " + (System.currentTimeMillis() - time));
+
+		System.out.println("One Thread.  Time: "
+				+ (System.currentTimeMillis() - time));
 	}
-	
-	
-	public static void MultiThread(Class<?> currClass, String outFileName,
+
+	public static void MultiThread(Class<?> plugin, String outFileName,
 			String[] args) throws FileNotFoundException, IOException,
-			InstantiationException, IllegalAccessException {
+			InstantiationException, IllegalAccessException,
+			InterruptedException {
 
 		long time = System.currentTimeMillis();
-					
-		int queryCapacity =100;
-		BlockingQueue<String> queue = new ArrayBlockingQueue<String>(queryCapacity, true);
+
+		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+
 		int start = 1;
 		FileLoader loader = new FileLoader(args, start);
-		FileReaderThread readerThread = new FileReaderThread(loader,queue);
+		FileReaderThread readerThread = new FileReaderThread(loader, queue);
 		readerThread.start();
-		
-		
-		ExecutorService executor =  Executors.newFixedThreadPool(5);
-		
+
 		int mapCapacity = 10000;
-		ConcurrentMap<String,Boolean> map = new ConcurrentHashMap<String,Boolean>(mapCapacity);
-	
-		
-		while (!queue.isEmpty()||readerThread.isAlive()){
-			executor.execute(new QueueReaderThread(queue, currClass, map));	
+		ConcurrentMap<String, Boolean> map = new ConcurrentHashMap<String, Boolean>(
+				mapCapacity);
+
+		int processorCount = Runtime.getRuntime().availableProcessors();
+
+		readerThread.join();
+
+		List<Thread> arrThread = new ArrayList<Thread>(processorCount);
+
+		for (int i = 0; i < processorCount; i++) {
+			arrThread.add(new QueueReaderThread(queue, plugin, map));
+			arrThread.get(i).start();
+			arrThread.get(i).join();
 		}
-		
-		executor.shutdown();
-		
-		
+
 		FileSaver saver = new FileSaver(outFileName);
 		for (String key : map.keySet()) {
 			saver.write(key);
 		}
 		saver.close();
 
-		System.out.println("Time: " + (System.currentTimeMillis() - time));
+		System.out.println("Available processors: " + processorCount);
+		System.out.println("MultiThread. Time: "
+				+ (System.currentTimeMillis() - time));
 	}
-	
 
 	public static void main(String[] args) throws ClassNotFoundException,
 			FileNotFoundException, IOException, InstantiationException,
-			IllegalAccessException {
+			IllegalAccessException, InterruptedException {
 
-		//System.out.println(Runtime.getRuntime().availableProcessors());
-		
 		resource = ResourceBundle.getBundle("data_en_EN");
 		final String MODULE_INTERFACE = "org.kolbas.common.interfaces.StringConvertable";
 
@@ -145,7 +146,7 @@ public class Main {
 		boolean seeHints = false;
 		JarLoader jarClassLoader = new JarLoader(args[0], seeHints);
 
-		ArrayList<Class<?>> classes = jarClassLoader
+		List<Class<?>> classes = jarClassLoader
 				.getClassesImplementsInterface(MODULE_INTERFACE);
 		if (classes.isEmpty()) {
 			p(resource.getString("FileNotContainInterface")
@@ -153,12 +154,11 @@ public class Main {
 					.replace("<interface>", MODULE_INTERFACE));
 			return;
 		}
+		Class<?> plugin = classes.get(0);
 
-		Class<?> currClass = classes.get(0);
+		OneThread(plugin, "D:\\output1.txt", args);
 
-		OneThread(currClass, "D:\\output1.txt", args);
-		
-		MultiThread(currClass, "D:\\output2.txt", args);
+		MultiThread(plugin, "D:\\output2.txt", args);
 
 	} // main
 
