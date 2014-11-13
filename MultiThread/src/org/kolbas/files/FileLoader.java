@@ -34,9 +34,10 @@ public class FileLoader{
 			tmp = new FileInputStream(args[i]);
 			inputStreams.add(tmp);
 		}
+		String currCharSetName ="UTF-8";
 		Enumeration<InputStream> enu = inputStreams.elements();
 		SequenceInputStream sis = new SequenceInputStream(enu);
-		reader = new BufferedReader(new InputStreamReader(sis));
+		reader = new BufferedReader(new InputStreamReader(sis,currCharSetName));
 	}
 
 	public List<String> nextStrings(int N) {

@@ -10,10 +10,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.kolbas.common.interfaces.StringConvertable;
 
-/**
- * @author Колбсов П.А.
- *
- */
+
 public class QueueReaderThread extends Thread {
 
 	private BlockingQueue<String> queue;

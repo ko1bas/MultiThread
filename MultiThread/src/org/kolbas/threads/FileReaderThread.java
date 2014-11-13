@@ -8,10 +8,6 @@ import java.util.concurrent.BlockingQueue;
 
 import org.kolbas.files.FileLoader;
 
-/**
- * @author Колбсов П.А.
- *
- */
 public class FileReaderThread extends Thread {
 
 	private FileLoader loader;

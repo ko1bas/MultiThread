@@ -50,7 +50,6 @@ public class Main {
 			}
 			break;
 		default:
-			// Дописать проверку
 			//MultiThread <jar-file> <txt-file1> [<txt-file2> ...] 
 			res = true;
 			break;

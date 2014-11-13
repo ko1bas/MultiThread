@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
-/**
- * @author Колбсов П.А.
- *
- */
+
 public class FileSaver {
 	private final String fname;
 	private final BufferedWriter writer;
