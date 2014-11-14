@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -38,23 +41,7 @@ public class FileLoader{
 		Enumeration<InputStream> enu = inputStreams.elements();
 		SequenceInputStream sis = new SequenceInputStream(enu);
 		reader = new BufferedReader(new InputStreamReader(sis,currCharSetName));
-	}
-
-	public List<String> nextStrings(int N) {
-		try {
-			List<String> res = new ArrayList<String>(N);
-
-			for (int i = 0; i < N; i++) {
-				String buf = reader.readLine();
-				if (buf == null)
-					break;
-				res.add(buf);
-			}
-			return res;
-
-		} catch (IOException e) {
-			return (List<String>) Collections.EMPTY_LIST;
-		}
+		
 	}
 
 	public String next() {

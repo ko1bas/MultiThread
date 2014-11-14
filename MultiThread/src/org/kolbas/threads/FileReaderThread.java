@@ -3,20 +3,32 @@
  */
 package org.kolbas.threads;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 
 import org.kolbas.files.FileLoader;
 
-public class FileReaderThread extends Thread {
+public class FileReaderThread extends Thread  implements Callable<Boolean>{
 
 	private FileLoader loader;
 	private BlockingQueue<String> queue;
+	private boolean isClose;
+	
 
-	public FileReaderThread(FileLoader loader, BlockingQueue<String> queue) {
+	public FileReaderThread(FileLoader loader, BlockingQueue<String> queue ){
 
 		this.loader = loader;
 		this.queue = queue;
+		this.isClose =false;
+	}
+	
+	public FileReaderThread(String fileName, BlockingQueue<String> queue) throws FileNotFoundException, IOException {
+
+		this.loader = new FileLoader(fileName);
+		this.queue = queue;
+		this.isClose =false;
 	}
 
 	@Override
@@ -34,6 +46,7 @@ public class FileReaderThread extends Thread {
 				}
 			}
 		} finally {
+			isClose =true;
 			try {
 				loader.close();
 			} catch (IOException e) {
@@ -41,6 +54,12 @@ public class FileReaderThread extends Thread {
 			}
 		}
 
+	}
+
+	@Override
+	public Boolean call() throws Exception {
+		
+		return isClose;
 	}
 
 }
